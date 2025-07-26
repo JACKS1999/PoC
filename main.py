@@ -48,15 +48,10 @@ def initial_propagation(keplerian_elements, mass, radius, drag_coeff, reflect_co
 
 
 def main():
-    perigee = 6378+453
-    e = 0.1
-    a = functions.perigee_eccentricity_to_semimajoraxis(perigee, e)
 
     epoch = datetime(2024, 6, 3, 00, 00)
 
     #*** PRIMARY OBJECT ***#
-    #i, raan, e, w, nu, rev_per_day = 42.9999, 105.7672, 0.0001636, 283.8294 , 76.2380, 15.40706011
-    #a = functions.rev_to_semilatus(rev_per_day)
     primary_initial_keplerian_elements = [6378+300, 0, 45, 1, 0, 1] #constants.R_EARTH+300.0115, 0, 45, 1, 0, 0.96 #  6378+300, 0, 45, 1, 0, 1
     primary_mass = 150
     primary_radius = 1
@@ -65,8 +60,6 @@ def main():
     #primary_days_since_epoch = 3.481
 
     #*** SECONDARY OBJECT ***#
-    #i, raan, e, w, nu, rev_per_day = 43.0034,  58.1827, 0.0001424, 266.5701,  93.4993, 15.40709796
-    #a = functions.rev_to_semilatus(rev_per_day)
     secondary_initial_keplerian_elements = [constants.R_EARTH+300.155, 0, -0.01, 0, 0, 0.9999] #constants.R_EARTH+300.17, 0, 0.01, 0, 0, 0.96 # constants.R_EARTH+300.155, 0, -0.01, 0, 0, 0.9999
     secondary_mass = 150
     secondary_radius = 1
@@ -93,69 +86,6 @@ def main():
     safety_distance = 10
     
     run_probability_of_collision(primary_initial_keplerian_elements, primary_mass, primary_radius, primary_drag_coefficient, primary_reflectivity, secondary_initial_keplerian_elements, secondary_mass, secondary_radius, secondary_drag_coefficient, secondary_reflectivity, safety_distance, start_time, propagation_time, number_of_evaluations)
-
-def run_probability_of_collision2(delta_radius, primary_data, secondary_data, start_time, propagation_time, number_of_evaluations):
-    udp = PoC4_Vallado.probability_of_collision2(delta_radius, primary_data, secondary_data, start_time, propagation_time, number_of_evaluations,
-                                                 max_harmonics_degree = 2,max_harmonics_order = 0,rtol = 1e-12, atol = 1e-12)
-    udp.calculate_probability2()
-
-def main2():
-    epoch = datetime(2024, 6, 3, 00, 00)
-    propagation_time = 0.2*constants.DAY2SEC
-    number_of_evaluations = propagation_time / (100)
-    primary_radius = 1
-    primary_drag_coefficient = 0#2.1
-    primary_reflectivity = 0#1
-    secondary_initial_keplerian_elements = [constants.R_EARTH+300.155, 0, -0.01, 0, 0, 0.9999] #constants.R_EARTH+300.17, 0, 0.01, 0, 0, 0.96 # constants.R_EARTH+300.155, 0, -0.01, 0, 0, 0.9999
-    secondary_mass = 150
-    secondary_radius = 1
-    secondary_drag_coefficient = 0#2.1
-    secondary_reflectivity = 0#1
-    data = np.loadtxt('final_states.txt')
-    for i in range(len(data)):
-        data_line = data[i]
-        delta_radius = data_line[0]
-        tof = data_line[1]
-        start_time = epoch + timedelta(seconds = tof)
-        primary_initial_state = data_line[2:-1]
-        primary_mass = data_line[-1]
-        #primary_initial_keplerian_elements = [6378+300+(delta_radius*1e-3), 0, 45, 1, 0, 1]
-        #primary_initial_state = functions.keplerian_elements_to_state(primary_initial_keplerian_elements, constants.MU_EARTH)
-        primary_data = np.hstack([primary_initial_state, primary_mass, primary_radius, primary_drag_coefficient, primary_reflectivity])
-        secondary_initial_state = initial_propagation(secondary_initial_keplerian_elements, secondary_mass, secondary_radius, secondary_drag_coefficient, secondary_reflectivity, epoch, tof)
-        #secondary_initial_state = functions.keplerian_elements_to_state(secondary_initial_keplerian_elements, constants.MU_EARTH)
-        secondary_data = np.hstack([secondary_initial_state, secondary_mass, secondary_radius, secondary_drag_coefficient, secondary_reflectivity])
-        run_probability_of_collision2(delta_radius, primary_data, secondary_data, start_time, propagation_time, number_of_evaluations)
-
-
-def main_single():
-    
-    data = [-19, 739.0186631333312, 4229.931167985716, 3690.9811728921177, 3616.5965400685564, -5.97761262684034, 3.4087513016852715, 3.512511946684692, 149.9999868032382]
-
-    epoch = datetime(2024, 6, 3, 00, 00)
-    propagation_time = 0.2*constants.DAY2SEC
-    number_of_evaluations = propagation_time / (100)
-    primary_radius = 1
-    primary_drag_coefficient = 0#2.1
-    primary_reflectivity = 0#1
-    secondary_initial_keplerian_elements = [constants.R_EARTH+300.155, 0, -0.01, 0, 0, 0.9999] #constants.R_EARTH+300.17, 0, 0.01, 0, 0, 0.96 # constants.R_EARTH+300.155, 0, -0.01, 0, 0, 0.9999
-    secondary_mass = 150
-    secondary_radius = 1
-    secondary_drag_coefficient = 0#2.1
-    secondary_reflectivity = 0#1
-
-    delta_radius = data[0]
-    tof = data[1]
-    start_time = epoch + timedelta(seconds = tof)
-    primary_initial_state = data[2:-1]
-    primary_mass = data[-1]
-    #primary_initial_keplerian_elements = [6378+300+(delta_radius*1e-3), 0, 45, 1, 0, 1]
-    #primary_initial_state = functions.keplerian_elements_to_state(primary_initial_keplerian_elements, constants.MU_EARTH)
-    primary_data = np.hstack([primary_initial_state, primary_mass, primary_radius, primary_drag_coefficient, primary_reflectivity])
-    secondary_initial_state = initial_propagation(secondary_initial_keplerian_elements, secondary_mass, secondary_radius, secondary_drag_coefficient, secondary_reflectivity, epoch, tof)
-    #secondary_initial_state = functions.keplerian_elements_to_state(secondary_initial_keplerian_elements, constants.MU_EARTH)
-    secondary_data = np.hstack([secondary_initial_state, secondary_mass, secondary_radius, secondary_drag_coefficient, secondary_reflectivity])
-    run_probability_of_collision2(delta_radius, primary_data, secondary_data, start_time, propagation_time, number_of_evaluations)
 
 
 if __name__ == "__main__":

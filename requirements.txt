@@ -1,0 +1,7 @@
+scipy
+datetime
+plotly
+numba
+numpy
+nrlmsise00
+spiceypy
